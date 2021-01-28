@@ -54,6 +54,8 @@ module Homebrew
   message = ENV['MESSAGE']
   tap = ENV['TAP']
   formula = ENV['FORMULA']
+  version = ENV['VERSION']
+  url = ENV['URL']
   tag = ENV['TAG']
   revision = ENV['REVISION']
   force = ENV['FORCE']
@@ -65,7 +67,8 @@ module Homebrew
   # Check inputs
   if livecheck.false?
     odie "Need 'formula' input specified" if formula.blank?
-    odie "Need 'tag' input specified" if tag.blank?
+    odie "Need 'version', 'url', or 'tag' input specified" if [version, url, tag].all?(&:blank?)
+    odie "Need 'revision' input specified" if tag.present? && revision.blank?
   end
 
   # Get user details
@@ -103,24 +106,18 @@ module Homebrew
     # Change formula name to full name
     formula = tap + '/' + formula if !tap.blank? && !formula.blank?
 
-    # Get info about formula
-    stable = Formula[formula].stable
-    is_git = stable.downloader.is_a? GitDownloadStrategy
-
-    # Prepare tag and url
-    tag = tag.delete_prefix 'refs/tags/'
-    version = Version.parse tag
-    url = stable.url.gsub stable.version, version
+    # Prepare tag
+    tag = tag.delete_prefix('refs/tags/') if tag.present?
 
     # Finally bump the formula
     brew 'bump-formula-pr',
          '--no-audit',
          '--no-browse',
          "--message=#{message}",
-         *("--version=#{version}" unless is_git),
-         *("--url=#{url}" unless is_git),
-         *("--tag=#{tag}" if is_git),
-         *("--revision=#{revision}" if is_git),
+         *("--version=#{version}" if version.present?),
+         *("--url=#{url}" if url.present?),
+         *("--tag=#{tag}" if tag.present?),
+         *("--revision=#{revision}" if revision.present?),
          *('--force' unless force.false?),
          formula
   else

@@ -32,6 +32,14 @@ inputs:
       Example: lazygit
       Example (livecheck): lazygit, lazydocker, lazynpm
     required: false
+  version:
+    description: |
+      Formula version.
+    required: false
+  url:
+    description: |
+      Formula URL.
+    required: false
   tag:
     description: |
       Git tag.
@@ -77,6 +85,8 @@ runs:
         MESSAGE: ${{inputs.message}}
         TAP: ${{inputs.tap}}
         FORMULA: ${{inputs.formula}}
+        VERSION: ${{inputs.version}}
+        URL: ${{inputs.url}}
         TAG: ${{inputs.tag}}
         REVISION: ${{inputs.revision}}
         FORCE: ${{inputs.force}}
